@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { authApi } from '@/services/api';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -32,22 +32,21 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Store user data in localStorage (in a real app, this would be a JWT token)
       if (mode === 'signup') {
-        localStorage.setItem('user', JSON.stringify({
+        const response = await authApi.register({
           name: formData.name,
           email: formData.email,
-        }));
+          password: formData.password
+        });
+        const { token, user } = response.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
         toast.success('Account created successfully!');
       } else {
-        // In a real app, this would verify credentials against backend
-        localStorage.setItem('user', JSON.stringify({
-          name: formData.name || 'John Doe', // Fallback name
-          email: formData.email,
-        }));
+        const response = await authApi.login(formData.email, formData.password);
+        const { token, user } = response.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
         toast.success('Login successful!');
       }
       
@@ -55,8 +54,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
       setTimeout(() => {
         navigate('/dashboard');
       }, 300);
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message || 'Authentication failed. Please try again.';
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }

@@ -11,6 +11,10 @@ const savingsRoutes = require('./routes/savings.routes');
 const expensesRoutes = require('./routes/expenses.routes');
 const goalsRoutes = require('./routes/goals.routes');
 const financialHealthRoutes = require('./routes/financialHealth.routes');
+const alertsRoutes = require('./routes/alerts.routes');
+const reportsRoutes = require('./routes/reports.routes');
+const settingsRoutes = require('./routes/settings.routes');
+const incomeRoutes = require('./routes/income.routes');
 
 // Load environment variables
 dotenv.config();
@@ -127,6 +131,10 @@ app.use('/api/savings', savingsRoutes);
 app.use('/api/expenses', expensesRoutes);
 app.use('/api/goals', goalsRoutes);
 app.use('/api/financial-health', financialHealthRoutes);
+app.use('/api/alerts', alertsRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/income', incomeRoutes);
 console.log('Routes setup complete');
 
 // Error handling middleware

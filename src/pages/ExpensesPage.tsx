@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
-import { Plus, Trash2, IndianRupee } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatToINR } from '@/lib/utils';
+import { expensesApi } from '@/services/api';
+import { toast } from 'sonner';
 
 interface Expense {
-  id: string;
+  _id: string;
   amount: number;
   category: string;
   description: string;
@@ -35,25 +37,55 @@ const ExpensesPage = () => {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState(EXPENSE_CATEGORIES[0]);
   const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddExpense = () => {
-    if (!amount || !category) return;
-
-    const newExpense: Expense = {
-      id: Math.random().toString(36).substr(2, 9),
-      amount: parseFloat(amount),
-      category,
-      description,
-      date: format(new Date(), 'yyyy-MM-dd')
-    };
-
-    setExpenses([...expenses, newExpense]);
-    setAmount('');
-    setDescription('');
+  const fetchExpenses = async () => {
+    try {
+      setIsLoading(true);
+      const response = await expensesApi.getExpenses();
+      setExpenses(response.data.expenses || []);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      toast.error('Failed to load expenses.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteExpense = (id: string) => {
-    setExpenses(expenses.filter(expense => expense.id !== id));
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
+
+  const handleAddExpense = async () => {
+    if (!amount || !category) return;
+
+    try {
+      const response = await expensesApi.addExpense({
+        amount: parseFloat(amount),
+        category,
+        description,
+        date: new Date()
+      });
+      
+      toast.success('Expense added successfully.');
+      fetchExpenses(); // Re-fetch to update all stats and totals
+      setAmount('');
+      setDescription('');
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      toast.error('Failed to add expense.');
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    try {
+      await expensesApi.deleteExpense(id);
+      toast.success('Expense deleted successfully.');
+      setExpenses(expenses.filter(expense => expense._id !== id));
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast.error('Failed to delete expense.');
+    }
   };
 
   const categoryData = EXPENSE_CATEGORIES.map(cat => ({
@@ -125,24 +157,34 @@ const ExpensesPage = () => {
             <CardDescription>Total Expenses: {formatToINR(totalExpenses)}</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ name, value }) => `${name}: ${formatToINR(value)}`}
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <div className="flex h-full w-full justify-center items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ name, value }) => `${name}: ${formatToINR(value)}`}
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full w-full justify-center items-center flex-col">
+                <p className="text-muted-foreground text-sm">No expense data available</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -155,18 +197,24 @@ const ExpensesPage = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {expenses.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : expenses.length === 0 ? (
               <p className="text-muted-foreground text-center">No expenses recorded yet.</p>
             ) : (
               <div className="divide-y">
                 {expenses.map((expense) => (
-                  <div key={expense.id} className="py-4 flex items-center justify-between">
+                  <div key={expense._id} className="py-4 flex items-center justify-between">
                     <div>
                       <p className="font-medium">{expense.category}</p>
                       <p className="text-sm text-muted-foreground">
                         {expense.description || 'No description'}
                       </p>
-                      <p className="text-sm text-muted-foreground">{expense.date}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(expense.date), 'dd MMM yyyy, hh:mm a')}
+                      </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="font-semibold flex items-center">
@@ -175,7 +223,7 @@ const ExpensesPage = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteExpense(expense.id)}
+                        onClick={() => handleDeleteExpense(expense._id)}
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>

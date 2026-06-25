@@ -126,6 +126,60 @@ export const expensesApi = {
   }
 };
 
+// Savings API endpoints
+export const savingsApi = {
+  getSavings: async (startDate?: Date, endDate?: Date) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate.toISOString());
+    if (endDate) params.append('endDate', endDate.toISOString());
+    return apiClient.get('/savings?' + params.toString());
+  },
+  addSaving: async (savingData: any) => {
+    return apiClient.post('/savings', savingData);
+  },
+  updateSaving: async (id: string, savingData: any) => {
+    return apiClient.patch(`/savings/${id}`, savingData);
+  },
+  deleteSaving: async (id: string) => {
+    return apiClient.delete(`/savings/${id}`);
+  }
+};
+
+// Goals API endpoints
+export const goalsApi = {
+  getGoals: async () => {
+    return apiClient.get('/goals');
+  },
+  addGoal: async (goalData: any) => {
+    return apiClient.post('/goals', goalData);
+  },
+  updateGoal: async (id: string, goalData: any) => {
+    return apiClient.patch(`/goals/${id}`, goalData);
+  },
+  deleteGoal: async (id: string) => {
+    return apiClient.delete(`/goals/${id}`);
+  },
+  updateGoalProgress: async (id: string, amount: number) => {
+    return apiClient.post(`/goals/${id}/progress`, { amount });
+  },
+  addMilestone: async (id: string, milestone: any) => {
+    return apiClient.post(`/goals/${id}/milestones`, milestone);
+  }
+};
+
+// Income API endpoints
+export const incomeApi = {
+  getIncome: async (startDate?: Date, endDate?: Date) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate.toISOString());
+    if (endDate) params.append('endDate', endDate.toISOString());
+    return apiClient.get('/income?' + params.toString());
+  },
+  addIncome: async (incomeData: any) => {
+    return apiClient.post('/income', incomeData);
+  }
+};
+
 // Reports API endpoints
 export const reportsApi = {
   getReportsData: async (period: string, selectedDate?: Date) => {
