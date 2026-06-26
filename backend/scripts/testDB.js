@@ -1,14 +1,20 @@
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const User = require('../models/User.model');
 const Expense = require('../models/Expense.model');
 const Savings = require('../models/Savings.model');
 const Goal = require('../models/Goal.model');
 
+// Load environment variables
+dotenv.config();
+
 async function testDatabase() {
   try {
     // Connect to MongoDB
     console.log('Connecting to MongoDB...');
-    await mongoose.connect('mongodb://127.0.0.1:27017/smartbudget');
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/smartbudget';
+    console.log('Using database URI:', mongoUri);
+    await mongoose.connect(mongoUri);
     console.log('Connected successfully');
 
     // Test User Operations

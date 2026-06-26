@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "server": "cd backend && npm run dev",
     "server:start": "cd backend && npm start",
-    "setup-db": "node setup-database.js",
+    "setup-db": "node setup-database.cjs",
     "test-db": "node backend/db-test.js",
     "init-db": "node backend/init-db.js",
     "setup": "npm install && cd backend && npm install",
