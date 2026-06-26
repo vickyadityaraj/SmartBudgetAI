@@ -35,6 +35,18 @@ const financialHealthSchema = new mongoose.Schema({
       weight: { type: Number, default: 0.15 }
     }
   },
+  balanceOverride: {
+    type: Number
+  },
+  incomeOverride: {
+    type: Number
+  },
+  expensesOverride: {
+    type: Number
+  },
+  savingsOverride: {
+    type: Number
+  },
   lastUpdated: {
     type: Date,
     default: Date.now

@@ -1,6 +1,7 @@
 const express = require('express');
 const Goal = require('../models/Goal.model');
 const auth = require('../middleware/auth.middleware');
+const { recalculateFinancialHealth } = require('../utils/financialHealthHelper');
 
 const router = express.Router();
 
@@ -42,6 +43,10 @@ router.post('/', auth, async (req, res) => {
     });
 
     await goal.save();
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.status(201).json({ goal });
   } catch (error) {
     res.status(500).json({ message: 'Error creating goal' });
@@ -84,6 +89,10 @@ router.patch('/:id', auth, async (req, res) => {
     });
 
     await goal.save();
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.json({ goal });
   } catch (error) {
     res.status(500).json({ message: 'Error updating goal' });
@@ -101,6 +110,9 @@ router.delete('/:id', auth, async (req, res) => {
     if (!goal) {
       return res.status(404).json({ message: 'Goal not found' });
     }
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
 
     res.json({ goal });
   } catch (error) {
@@ -123,6 +135,10 @@ router.post('/:id/progress', auth, async (req, res) => {
     }
 
     await goal.updateProgress(amount);
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.json({ goal });
   } catch (error) {
     res.status(500).json({ message: 'Error updating goal progress' });

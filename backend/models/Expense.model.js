@@ -53,7 +53,7 @@ expenseSchema.statics.calculateTotalExpenses = async function(userId, startDate,
   const result = await this.aggregate([
     {
       $match: {
-        userId: mongoose.Types.ObjectId(userId),
+        userId: new mongoose.Types.ObjectId(userId),
         date: {
           $gte: new Date(startDate),
           $lte: new Date(endDate)
@@ -75,7 +75,7 @@ expenseSchema.statics.getCategoryWiseExpenses = async function(userId, startDate
   return this.aggregate([
     {
       $match: {
-        userId: mongoose.Types.ObjectId(userId),
+        userId: new mongoose.Types.ObjectId(userId),
         date: {
           $gte: new Date(startDate),
           $lte: new Date(endDate)

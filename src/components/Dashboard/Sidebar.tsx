@@ -12,7 +12,9 @@ import {
   LogOut, 
   Menu, 
   ChevronRight,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Users,
+  Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -27,20 +29,31 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   
-  const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: CreditCard, label: 'Expenses', path: '/dashboard/expenses' },
-    { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
-    { icon: PiggyBank, label: 'Savings', path: '/dashboard/savings' },
-    { icon: Target, label: 'Goals', path: '/dashboard/goals' },
-    { icon: FileSpreadsheet, label: 'Bank Statement', path: '/dashboard/bank-statement' },
-    { icon: BellRing, label: 'Alerts', path: '/dashboard/alerts' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
-  ];
+  // Get user role from localStorage
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const isAdmin = user?.role === 'admin';
+  
+  const menuItems = isAdmin
+    ? [
+        { icon: Shield, label: 'Admin Overview', path: '/dashboard/admin' },
+        { icon: Users, label: 'User Management', path: '/dashboard/admin/users' },
+        { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+      ]
+    : [
+        { icon: Home, label: 'Dashboard', path: '/dashboard' },
+        { icon: CreditCard, label: 'Expenses', path: '/dashboard/expenses' },
+        { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
+        { icon: PiggyBank, label: 'Savings', path: '/dashboard/savings' },
+        { icon: Target, label: 'Goals', path: '/dashboard/goals' },
+        { icon: FileSpreadsheet, label: 'Bank Statement', path: '/dashboard/bank-statement' },
+        { icon: BellRing, label: 'Alerts', path: '/dashboard/alerts' },
+        { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+      ];
   
   const handleLogout = () => {
-    // In a real application, this would include auth token cleanup
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     toast.success('Logged out successfully');
     navigate('/');
   };
@@ -55,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     >
       <div className="p-4 flex items-center justify-between border-b">
         {!collapsed && (
-          <Link to="/dashboard" className="flex items-center space-x-2">
+          <Link to={isAdmin ? "/dashboard/admin" : "/dashboard"} className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-primary"></div>
             <span className="text-xl font-bold">FinGenius</span>
           </Link>

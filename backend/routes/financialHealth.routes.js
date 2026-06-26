@@ -8,76 +8,80 @@ const Income = require('../models/Income.model');
 const Savings = require('../models/Savings.model');
 const Goal = require('../models/Goal.model');
 
-// Get financial health score
+const { recalculateFinancialHealth } = require('../utils/financialHealthHelper');
+
+// Helper to enrich FinancialHealth with dynamic/calculated balance, income, expenses, and savings
+async function getEnrichedFinancialHealth(userId, healthScore) {
+  const [expenses, incomes, savings] = await Promise.all([
+    Expense.find({ userId }),
+    Income.find({ userId }),
+    Savings.find({ userId })
+  ]);
+
+  const dynamicIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
+  const dynamicExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const dynamicSavings = savings.reduce((sum, s) => {
+    return sum + (s.type === 'deposit' ? s.amount : -s.amount);
+  }, 0);
+  const dynamicBalance = dynamicIncome - dynamicExpenses - dynamicSavings;
+
+  return {
+    ...healthScore.toObject(),
+    balance: healthScore.balanceOverride !== undefined ? healthScore.balanceOverride : dynamicBalance,
+    income: healthScore.incomeOverride !== undefined ? healthScore.incomeOverride : dynamicIncome,
+    expenses: healthScore.expensesOverride !== undefined ? healthScore.expensesOverride : dynamicExpenses,
+    savings: healthScore.savingsOverride !== undefined ? healthScore.savingsOverride : dynamicSavings
+  };
+}
+
+// Get financial health score and summary (GET /)
 router.get('/', auth, async (req, res) => {
   try {
-    let healthScore = await FinancialHealth.findOne({ userId: req.user.id });
-    
-    if (!healthScore) {
-      // Create initial health score if it doesn't exist
-      healthScore = new FinancialHealth({
-        userId: req.user.id
-      });
-      await healthScore.save();
-    }
-    
-    res.json(healthScore);
+    // Automatically recalculate on GET to ensure fresh data
+    const healthScore = await recalculateFinancialHealth(req.user.id);
+    const enrichedData = await getEnrichedFinancialHealth(req.user.id, healthScore);
+    res.json(enrichedData);
   } catch (err) {
+    console.error('Error fetching/calculating financial health:', err);
     res.status(500).json({ message: 'Error fetching financial health score' });
   }
 });
 
-// Recalculate financial health score
+// Recalculate financial health score (explicit endpoint)
 router.post('/calculate', auth, async (req, res) => {
   try {
+    const healthScore = await recalculateFinancialHealth(req.user.id);
+    const enrichedData = await getEnrichedFinancialHealth(req.user.id, healthScore);
+    res.json(enrichedData);
+  } catch (err) {
+    console.error('Error calculating financial health:', err);
+    res.status(500).json({ message: 'Error calculating financial health score' });
+  }
+});
+
+// Update financial data (PATCH / - manual dashboard overrides)
+router.patch('/', auth, async (req, res) => {
+  try {
+    const { balance, income, expenses, savings } = req.body;
     let healthScore = await FinancialHealth.findOne({ userId: req.user.id });
     if (!healthScore) {
       healthScore = new FinancialHealth({ userId: req.user.id });
     }
 
-    // Get user's financial data
-    const [expenses, income, savings, goals] = await Promise.all([
-      Expense.find({ userId: req.user.id }),
-      Income.find({ userId: req.user.id }),
-      Savings.find({ userId: req.user.id }),
-      Goal.find({ userId: req.user.id })
-    ]);
+    if (balance !== undefined) healthScore.balanceOverride = balance;
+    if (income !== undefined) healthScore.incomeOverride = income;
+    if (expenses !== undefined) healthScore.expensesOverride = expenses;
+    if (savings !== undefined) healthScore.savingsOverride = savings;
 
-    // Calculate total monthly income
-    const monthlyIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
-
-    // Calculate savings ratio
-    const totalSavings = savings.reduce((sum, saving) => sum + saving.amount, 0);
-    const savingsRatio = monthlyIncome > 0 ? (totalSavings / monthlyIncome) * 100 : 0;
-    healthScore.factors.savingsRatio.score = Math.min(100, savingsRatio * 2); // 50% savings ratio = 100 score
-
-    // Calculate expenses to income ratio
-    const monthlyExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const expenseRatio = monthlyIncome > 0 ? (monthlyExpenses / monthlyIncome) * 100 : 100;
-    healthScore.factors.expensesToIncome.score = Math.max(0, 100 - expenseRatio); // Lower ratio is better
-
-    // Calculate emergency fund score (assuming 6 months of expenses is ideal)
-    const monthlyExpenseAverage = monthlyExpenses / 12;
-    const emergencyFundRatio = monthlyExpenseAverage > 0 ? totalSavings / (monthlyExpenseAverage * 6) : 0;
-    healthScore.factors.emergencyFund.score = Math.min(100, emergencyFundRatio * 100);
-
-    // Calculate goal progress
-    if (goals.length > 0) {
-      const goalScores = goals.map(goal => {
-        const progress = (goal.currentAmount / goal.targetAmount) * 100;
-        return Math.min(100, progress);
-      });
-      healthScore.factors.goalProgress.score = goalScores.reduce((sum, score) => sum + score, 0) / goals.length;
-    }
-
-    // Recalculate overall score
-    healthScore.recalculateScore();
     await healthScore.save();
 
-    res.json(healthScore);
+    // Recalculate score & weights, then enrich and return
+    const updatedScore = await recalculateFinancialHealth(req.user.id);
+    const enrichedData = await getEnrichedFinancialHealth(req.user.id, updatedScore);
+    res.json(enrichedData);
   } catch (err) {
-    console.error('Error calculating financial health:', err);
-    res.status(500).json({ message: 'Error calculating financial health score' });
+    console.error('Error updating financial overrides:', err);
+    res.status(500).json({ message: 'Error updating financial data' });
   }
 });
 

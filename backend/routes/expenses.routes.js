@@ -1,6 +1,7 @@
 const express = require('express');
 const Expense = require('../models/Expense.model');
 const auth = require('../middleware/auth.middleware');
+const { recalculateFinancialHealth } = require('../utils/financialHealthHelper');
 
 const router = express.Router();
 
@@ -67,6 +68,9 @@ router.post('/', auth, async (req, res) => {
 
     await expense.save();
 
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.status(201).json({ expense });
   } catch (error) {
     res.status(500).json({ message: 'Error adding expense' });
@@ -107,6 +111,10 @@ router.patch('/:id', auth, async (req, res) => {
     });
 
     await expense.save();
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.json({ expense });
   } catch (error) {
     res.status(500).json({ message: 'Error updating expense' });
@@ -124,6 +132,9 @@ router.delete('/:id', auth, async (req, res) => {
     if (!expense) {
       return res.status(404).json({ message: 'Expense not found' });
     }
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
 
     res.json({ expense });
   } catch (error) {

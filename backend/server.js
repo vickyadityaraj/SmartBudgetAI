@@ -15,6 +15,7 @@ const alertsRoutes = require('./routes/alerts.routes');
 const reportsRoutes = require('./routes/reports.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const incomeRoutes = require('./routes/income.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Load environment variables
 dotenv.config();
@@ -135,6 +136,7 @@ app.use('/api/alerts', alertsRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/income', incomeRoutes);
+app.use('/api/admin', adminRoutes);
 console.log('Routes setup complete');
 
 // Error handling middleware

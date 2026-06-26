@@ -238,33 +238,6 @@ const SavingsPage = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Total Savings
                   </CardTitle>
-                  <Dialog open={isEditingSavings} onOpenChange={setIsEditingSavings}>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Total Savings</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-amount">New Total Amount</Label>
-                          <Input
-                            id="edit-amount"
-                            type="number"
-                            value={editAmount}
-                            onChange={(e) => setEditAmount(e.target.value)}
-                            placeholder="Enter new total amount"
-                          />
-                        </div>
-                        <Button onClick={handleEditSavings} className="w-full">
-                          Save Changes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -297,35 +270,6 @@ const SavingsPage = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Savings Rate
                   </CardTitle>
-                  <Dialog open={isEditingSavingsRate} onOpenChange={setIsEditingSavingsRate}>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Savings Rate</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-rate">Target Savings Rate (%)</Label>
-                          <Input
-                            id="edit-rate"
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={editSavingsRate}
-                            onChange={(e) => setEditSavingsRate(e.target.value)}
-                            placeholder="Enter target rate"
-                          />
-                        </div>
-                        <Button onClick={handleEditSavingsRate} className="w-full">
-                          Save Changes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -348,33 +292,6 @@ const SavingsPage = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     Monthly Trend
                   </CardTitle>
-                  <Dialog open={isEditingMonthlyTrend} onOpenChange={setIsEditingMonthlyTrend}>
-                    <DialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Monthly Savings</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="edit-monthly">Current Month's Savings</Label>
-                          <Input
-                            id="edit-monthly"
-                            type="number"
-                            value={editMonthlyAmount}
-                            onChange={(e) => setEditMonthlyAmount(e.target.value)}
-                            placeholder="Enter amount"
-                          />
-                        </div>
-                        <Button onClick={handleEditMonthlyTrend} className="w-full">
-                          Save Changes
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>

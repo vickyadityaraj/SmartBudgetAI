@@ -50,22 +50,22 @@ router.get('/overview', auth, async (req, res) => {
       }
     ]);
 
-    // Calculate financial health score (0-100)
+    // Fetch the official financial health score from the database (calculated dynamically)
+    const FinancialHealth = require('../models/FinancialHealth.model');
+    const { recalculateFinancialHealth } = require('../utils/financialHealthHelper');
+    
+    let healthDoc = await FinancialHealth.findOne({ userId: req.user._id });
+    if (!healthDoc) {
+      healthDoc = await recalculateFinancialHealth(req.user._id);
+    }
+    const healthScore = healthDoc ? healthDoc.overallScore : 0;
+
     const totalIncome = income[0]?.total || 0;
     const totalExpenses = expenses[0]?.total || 0;
     const totalSavings = savings[0]?.total || 0;
 
     const savingsRate = totalIncome > 0 ? (totalSavings / totalIncome) * 100 : 0;
     const expenseRate = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
-    
-    let healthScore = 0;
-    if (totalIncome > 0) {
-      healthScore = Math.min(100, Math.max(0,
-        50 + // Base score
-        (savingsRate * 0.5) - // Bonus for savings
-        (Math.max(0, expenseRate - 70) * 0.5) // Penalty for high expenses
-      ));
-    }
 
     res.json({
       overview: {

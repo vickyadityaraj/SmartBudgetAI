@@ -39,7 +39,7 @@ savingsSchema.virtual('formattedAmount').get(function() {
 // Method to calculate total savings
 savingsSchema.statics.calculateTotalSavings = async function(userId) {
   const result = await this.aggregate([
-    { $match: { userId: mongoose.Types.ObjectId(userId) } },
+    { $match: { userId: new mongoose.Types.ObjectId(userId) } },
     { $group: {
       _id: null,
       total: {
@@ -59,7 +59,7 @@ savingsSchema.statics.calculateTotalSavings = async function(userId) {
 // Method to calculate savings rate
 savingsSchema.statics.calculateSavingsRate = async function(userId) {
   const result = await this.aggregate([
-    { $match: { userId: mongoose.Types.ObjectId(userId) } },
+    { $match: { userId: new mongoose.Types.ObjectId(userId) } },
     { $group: {
       _id: '$type',
       total: { $sum: '$amount' }

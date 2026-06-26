@@ -38,6 +38,7 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
         settings: user.settings
       }
     });
@@ -76,6 +77,7 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
         settings: user.settings
       }
     });
@@ -92,6 +94,7 @@ router.get('/me', auth, async (req, res) => {
         id: req.user._id,
         name: req.user.name,
         email: req.user.email,
+        role: req.user.role,
         settings: req.user.settings
       }
     });

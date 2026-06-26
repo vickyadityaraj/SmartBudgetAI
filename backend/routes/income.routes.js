@@ -1,6 +1,7 @@
 const express = require('express');
 const Income = require('../models/Income.model');
 const auth = require('../middleware/auth.middleware');
+const { recalculateFinancialHealth } = require('../utils/financialHealthHelper');
 
 const router = express.Router();
 
@@ -70,6 +71,10 @@ router.post('/', auth, async (req, res) => {
     });
 
     await income.save();
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.status(201).json({ income });
   } catch (error) {
     res.status(500).json({ message: 'Error creating income entry' });
@@ -110,6 +115,10 @@ router.patch('/:id', auth, async (req, res) => {
     });
 
     await income.save();
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
+
     res.json({ income });
   } catch (error) {
     res.status(500).json({ message: 'Error updating income entry' });
@@ -127,6 +136,9 @@ router.delete('/:id', auth, async (req, res) => {
     if (!income) {
       return res.status(404).json({ message: 'Income entry not found' });
     }
+
+    // Automatically recalculate user's Financial Health Score
+    await recalculateFinancialHealth(req.user._id);
 
     res.json({ income });
   } catch (error) {

@@ -263,4 +263,20 @@ const generateMockReportsData = (period: string) => {
   };
 };
 
+// Admin API endpoints
+export const adminApi = {
+  getStats: async () => {
+    return apiClient.get('/admin/stats');
+  },
+  getUsers: async () => {
+    return apiClient.get('/admin/users');
+  },
+  updateUserRole: async (id: string, role: 'user' | 'admin') => {
+    return apiClient.patch(`/admin/users/${id}/role`, { role });
+  },
+  deleteUser: async (id: string) => {
+    return apiClient.delete(`/admin/users/${id}`);
+  }
+};
+
 export default apiClient; 

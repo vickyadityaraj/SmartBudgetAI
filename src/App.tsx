@@ -20,6 +20,8 @@ import GoalsPage from "./pages/GoalsPage";
 import AlertsPage from "./pages/AlertsPage";
 import SettingsPage from "./pages/SettingsPage";
 import BankStatementAnalyzer from "./pages/BankStatementAnalyzer";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsersPage from "./pages/AdminUsersPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,8 @@ const App = () => (
               <Route path="alerts" element={<AlertsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="bank-statement" element={<BankStatementAnalyzer />} />
+              <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin/users" element={<AdminUsersPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

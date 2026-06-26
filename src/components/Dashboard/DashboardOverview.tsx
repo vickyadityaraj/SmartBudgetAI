@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth, subMonths, eachWeekOfInterval, getWeek, startOfWeek, endOfWeek, addDays } from 'date-fns';
 // Import the API service
-import { dashboardApi } from '@/services/api';
+import { dashboardApi, expensesApi } from '@/services/api';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Import event bus
 import eventBus, { EVENTS } from '@/services/eventBus';
@@ -696,82 +696,38 @@ const DashboardOverview = () => {
     }
   };
   
-  // Add function to handle adding a new expense - restored version
-  const handleAddExpense = (values: NewExpenseValues) => {
-    const newExpense = {
-      date: format(values.date, 'dd MMM'),
-      amount: parseFloat(values.amount),
-      category: values.category,
-      description: values.description || ""
-    };
-    
-    // Add to daily expense data
-    const updatedDailyData = [...dailyExpenseData];
-    const existingDayIndex = updatedDailyData.findIndex(item => item.date === newExpense.date);
-    
-    if (existingDayIndex !== -1) {
-      // Update existing day
-      updatedDailyData[existingDayIndex].amount += newExpense.amount;
-    } else {
-      // Add new day
-      updatedDailyData.push({
-        date: newExpense.date,
-        amount: newExpense.amount
+  // Add function to handle adding a new expense via backend API
+  const handleAddExpense = async (values: NewExpenseValues) => {
+    try {
+      setIsRefreshing(true);
+      await expensesApi.addExpense({
+        amount: parseFloat(values.amount),
+        category: values.category,
+        description: values.description || "",
+        date: values.date
       });
-      
-      // Sort by date
-      updatedDailyData.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return dateA.getTime() - dateB.getTime();
+
+      toast({
+        title: "Expense added successfully",
+        description: "Your available balance and monthly statistics have been updated in real-time.",
       });
+
+      // Close the modal and reset the form
+      setIsAddExpenseModalOpen(false);
+      newExpenseForm.reset();
+
+      // Reload all dashboard data from the backend!
+      await fetchDashboardData();
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add expense. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
     }
-    
-    setDailyExpenseData(updatedDailyData);
-    
-    // Update expense categories
-    const updatedCategories = [...expenseCategories];
-    const existingCategoryIndex = updatedCategories.findIndex(item => item.name === newExpense.category);
-    
-    if (existingCategoryIndex !== -1) {
-      // Update existing category
-      updatedCategories[existingCategoryIndex].value += newExpense.amount;
-    } else {
-      // Add new category
-      updatedCategories.push({
-        name: newExpense.category,
-        value: newExpense.amount
-      });
-    }
-    
-    setExpenseCategories(updatedCategories);
-    
-    // Update monthly data
-    setBalanceData(prev => ({
-      ...prev,
-      monthlyExpenses: prev.monthlyExpenses + newExpense.amount
-    }));
-    
-    // Update monthly report
-    setMonthlyReport(prev => {
-      const newTotalExpenses = prev.totalExpenses + newExpense.amount;
-      return {
-        ...prev,
-        totalExpenses: newTotalExpenses,
-        totalSavings: prev.totalIncome - newTotalExpenses
-      };
-    });
-    
-    // Close the modal and reset the form
-    setIsAddExpenseModalOpen(false);
-    newExpenseForm.reset();
-    
-    // Show success toast
-    toast({
-      title: "Expense added",
-      description: `Added ${formatToINR(newExpense.amount)} to ${newExpense.category}`,
-      variant: "default",
-    });
   };
 
   // Render loading skeleton
@@ -871,14 +827,6 @@ const DashboardOverview = () => {
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Total Balance
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 sm:h-8 sm:w-8"
-              onClick={() => handleEdit('totalBalance')}
-            >
-              <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
             <div className="flex items-center justify-between">
@@ -897,14 +845,6 @@ const DashboardOverview = () => {
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Monthly Income
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 sm:h-8 sm:w-8"
-              onClick={() => handleEdit('monthlyIncome')}
-            >
-              <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
             <div className="flex items-center justify-between">
@@ -926,14 +866,6 @@ const DashboardOverview = () => {
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Monthly Expenses
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 sm:h-8 sm:w-8"
-              onClick={() => handleEdit('monthlyExpenses')}
-            >
-              <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
             <div className="flex items-center justify-between">
@@ -955,14 +887,6 @@ const DashboardOverview = () => {
             <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
               Monthly Savings
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 sm:h-8 sm:w-8"
-              onClick={() => handleEdit('monthlySavings')}
-            >
-              <Edit2 className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
           </CardHeader>
           <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
             <div className="flex items-center justify-between">
