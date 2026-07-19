@@ -279,4 +279,27 @@ export const adminApi = {
   }
 };
 
+// AI Assignment API endpoints
+export const aiApi = {
+  configCheck: async () => {
+    return apiClient.get('/ai/config-check');
+  },
+  runAdvisorChat: async (prompt: string) => {
+    return apiClient.post('/ai/advisor-chat', { prompt });
+  },
+  runInsightsChain: async (topic: string) => {
+    return apiClient.post('/ai/insights-chain', { topic });
+  },
+  runBudgetAgent: async (task: string) => {
+    return apiClient.post('/ai/budget-agent', { task });
+  },
+  runDocAnalyzer: async (formData: FormData) => {
+    return apiClient.post('/ai/doc-analyzer', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+};
+
 export default apiClient; 

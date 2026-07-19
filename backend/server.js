@@ -16,8 +16,11 @@ const reportsRoutes = require('./routes/reports.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const incomeRoutes = require('./routes/income.routes');
 const adminRoutes = require('./routes/admin.routes');
+const aiRoutes = require('./routes/ai.routes');
 
 // Load environment variables
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 dotenv.config();
 console.log('Environment loaded, MONGODB_URI:', process.env.MONGODB_URI);
 console.log('PORT:', process.env.PORT);
@@ -137,6 +140,7 @@ app.use('/api/reports', reportsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiRoutes);
 console.log('Routes setup complete');
 
 // Error handling middleware

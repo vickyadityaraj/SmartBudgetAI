@@ -30,3 +30,6 @@ dist-ssr
 backend/.env
 backend/.env.local
 
+# Python files
+__pycache__/
+*.pyc

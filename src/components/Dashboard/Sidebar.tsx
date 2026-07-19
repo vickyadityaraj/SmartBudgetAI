@@ -14,7 +14,8 @@ import {
   ChevronRight,
   FileSpreadsheet,
   Users,
-  Shield
+  Shield,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     ? [
         { icon: Shield, label: 'Admin Overview', path: '/dashboard/admin' },
         { icon: Users, label: 'User Management', path: '/dashboard/admin/users' },
+        { icon: Brain, label: 'Smart Advisor', path: '/dashboard/smart-advisor' },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
       ]
     : [
@@ -47,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         { icon: PiggyBank, label: 'Savings', path: '/dashboard/savings' },
         { icon: Target, label: 'Goals', path: '/dashboard/goals' },
         { icon: FileSpreadsheet, label: 'Bank Statement', path: '/dashboard/bank-statement' },
+        { icon: Brain, label: 'Smart Advisor', path: '/dashboard/smart-advisor' },
         { icon: BellRing, label: 'Alerts', path: '/dashboard/alerts' },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
       ];
