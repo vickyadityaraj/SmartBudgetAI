@@ -47,145 +47,175 @@ We have provided template files showing what variables are required:
 *   Root template: [`.env.example`](file:///d:/Finance/.env.example)
 *   Backend template: [`backend/.env.example`](file:///d:/Finance/backend/.env.example)
 
-### Required Variables & How to Get Them
+### Required & Optional Environment Variables
 
-Here is the `.env` configuration you need to set up:
+Create `.env` files based on `.env.example` in both root and `backend/` directories:
 
 ```env
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-name>.mongodb.net/smartbudget?appName=Aditya
-JWT_SECRET=your_jwt_secret_key_here
+# Database & Server
+MONGODB_URI=mongodb://127.0.0.1:27017/smartbudget
 PORT=5000
+NODE_ENV=development
+
+# Security & Authentication
+JWT_SECRET=your_jwt_secret_key_here
+
+# Frontend Communication
 VITE_API_URL=http://localhost:5000/api
+
+# AI Financial Advisor API Keys (Optional)
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+OPENAI_API_KEY=sk-your_openai_api_key_here
 ```
 
-#### 1. `MONGODB_URI` (MongoDB Connection String)
-This connects your application to your database.
-*   **Local Database**: If you have MongoDB installed locally, use:
-    `mongodb://127.0.0.1:27017/smartbudget`
-*   **Cloud Database (MongoDB Atlas)**:
-    1.  Create a free account at [MongoDB Atlas](https://www.mongodb.com/).
-    2.  Create a database cluster and set up a **Database User** with a username and password under **Security > Database Access**.
-    3.  Whitelist your IP address (or `0.0.0.0/0` for access from anywhere) under **Security > Network Access**.
-    4.  Click **Connect** on your cluster, select **Drivers**, choose **Node.js**, and copy the connection string.
-    5.  Replace `<username>` and `<password>` with your database user credentials.
-    *   *Note: If your password contains special characters like `@`, you must URL-encode them (e.g., `@` becomes `%40`) to prevent URI parsing errors.*
-
-#### 2. `JWT_SECRET` (JSON Web Token Secret)
-Used by the backend to securely sign and verify authentication tokens.
-*   **How to get it**: You can use any long, secure, random string.
-*   **Generate one quickly**: Open your terminal and run:
-    ```bash
-    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-    ```
-    Copy the generated string and paste it as your `JWT_SECRET`.
-
-#### 3. `PORT`
-The port number on which your Express backend server will run (default is `5000`).
-
-#### 4. `VITE_API_URL`
-The API URL that the React frontend uses to communicate with the backend. It must point to the backend's address (usually `http://localhost:PORT/api`, which defaults to `http://localhost:5000/api`).
+#### Detailed Variable Reference:
+1. **`MONGODB_URI`** (MongoDB Connection String)
+   * **Local MongoDB**: `mongodb://127.0.0.1:27017/smartbudget`
+   * **MongoDB Atlas Cloud**: `mongodb+srv://<username>:<password>@<cluster>.mongodb.net/smartbudget?retryWrites=true&w=majority`
+2. **`PORT`**: Backend server port (default: `5000`).
+3. **`NODE_ENV`**: Environment mode (`development` or `production`).
+4. **`JWT_SECRET`**: Secret key for JWT token encryption. Generate one using:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+5. **`VITE_API_URL`**: Backend API base URL for frontend (`http://localhost:5000/api`).
+6. **`GROQ_API_KEY` / `GEMINI_API_KEY` / `OPENAI_API_KEY`**: Optional API keys for AI advisor insights and recommendations.
 
 ---
 
-## ⚡ Quick Start: Automatic Setup (Recommended)
+## 📦 Installation of Dependencies
 
-We have provided an automated setup script that configures your environment, verifies dependencies, tests your database connection, and seeds your database with sample data.
+You need to install dependencies for both the root (React frontend) and the `backend` (Express API server).
 
-1.  Open your terminal in the root directory of the project.
-2.  Run the following command:
-    ```bash
-    npm run setup-db
-    ```
-3.  The interactive setup tool will guide you through:
-    *   Creating or verifying your `.env` file with custom database credentials.
-    *   Installing all necessary root and backend dependencies.
-    *   Testing your connection to the MongoDB database.
-    *   Initializing the database with required collections, indexes, and **rich sample seed data**.
+### Option A: One-Command Installation (Recommended)
 
----
+From the root directory, run:
 
-## 🔧 Manual Setup
-
-If you prefer to configure the application manually, follow these steps:
-
-### 1. Create your Environment Files
-1.  Copy `.env.example` to a new file named `.env` in the root directory and fill in your variables.
-2.  Copy `backend/.env.example` to a new file named `.env` in the `backend` directory and fill in your variables.
-
-### 2. Install Dependencies
-Install all required packages for both the frontend and backend in one command:
 ```bash
 npm run setup
 ```
-*(This runs `npm install` in the root and then runs `npm install` in the `backend` directory).*
 
-### 3. Test the Database Connection
-Verify that your backend can successfully connect to the configured MongoDB instance:
-```bash
-npm run test-db
-```
+*This command automatically executes `npm install` in the root directory and then in the `backend` directory.*
 
-### 4. Initialize and Seed the Database
-Create the required collections, generate database indexes, and seed the database with sample records:
-```bash
-npm run init-db
-```
+### Option B: Manual Step-by-Step Installation
+
+1. **Install Root (Frontend) Dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Install Backend Dependencies:**
+   ```bash
+   cd backend
+   npm install
+   cd ..
+   ```
 
 ---
 
-## 🔑 Pre-seeded Admin Account (First-Run Experience)
+## ⚡ Setup & Database Seeding
 
-During the database initialization, a default admin account is created and seeded with **6 months of realistic transaction history** (salary, freelance income, rent, utilities, food, transport, shopping, savings deposits, goals, and a pre-calculated financial health score). This allows you to immediately experience a fully-populated dashboard without entering data manually.
+### Automated Setup Tool (Recommended)
 
-Use the following credentials to log in:
+Run the interactive setup tool to configure `.env`, install dependencies, test database connectivity, and seed sample data:
 
-*   **Email:** `admin@smartbudget.com`
-*   **Password:** `SmartBudget@123`
+```bash
+npm run setup-db
+```
+
+### Manual Database Initialization
+
+If you prefer initializing manually:
+
+1. **Copy Environment Files**:
+   ```bash
+   # Windows PowerShell / CMD
+   copy .env.example .env
+   copy backend\.env.example backend\.env
+
+   # Mac / Linux
+   cp .env.example .env
+   cp backend/.env.example backend/.env
+   ```
+
+2. **Test Database Connection**:
+   ```bash
+   npm run test-db
+   ```
+
+3. **Initialize & Seed Database**:
+   ```bash
+   npm run init-db
+   ```
+
+---
+
+## 🔑 Pre-seeded Admin Account Credentials
+
+Database initialization seeds a demo account with **6 months of realistic financial transactions, goals, and metrics**:
+
+* **Email:** `admin@smartbudget.com`
+* **Password:** `SmartBudget@123`
 
 ---
 
 ## 🏃 Running the Application
 
-### 1. Concurrent Execution (Recommended)
-To run both the React frontend and the Express backend concurrently in a single terminal:
+### Method 1: Run Frontend & Backend Concurrently (Recommended)
+
+To start both the React frontend and Express backend simultaneously in a single terminal:
 
 ```bash
 npm run start:all
 ```
 
-This command runs both servers in parallel using the `concurrently` package:
-*   **Frontend (Vite dev server):** runs at `http://localhost:5173`
-*   **Backend (Express API server):** runs at `http://localhost:5000`
+* **Frontend App**: `http://localhost:5173`
+* **Backend API**: `http://localhost:5000`
 
-### 2. Separate Execution (Alternative)
-If you prefer to run and monitor the frontend and backend in separate terminal windows:
+### Method 2: Run Frontend & Backend Separately
 
-*   **Terminal 1: Start the Backend API Server**
-    ```bash
-    npm run server
-    ```
-    This launches the Express backend. It uses `nodemon` to automatically restart the server whenever you make changes to the backend files.
+Open two terminal windows:
 
-*   **Terminal 2: Start the Frontend React Application**
-    ```bash
-    npm run dev
-    ```
-    This launches the Vite development server for the React frontend with Hot Module Replacement (HMR) for instant updates.
+* **Terminal 1: Start Backend API**
+  ```bash
+  npm run server
+  ```
+  *(Runs `nodemon` in the `backend` folder to automatically restart on backend code changes)*
+
+* **Terminal 2: Start Frontend App**
+  ```bash
+  npm run dev
+  ```
+  *(Launches Vite dev server with Hot Module Replacement at `http://localhost:5173`)*
+
+### Method 3: Production Build & Preview
+
+To test a production build locally:
+
+1. **Build the Frontend**:
+   ```bash
+   npm run build
+   ```
+2. **Preview the Build**:
+   ```bash
+   npm run preview
+   ```
 
 ---
 
-## 🔍 Verifying the Setup
+## 🔍 Verifying the Application Setup
 
-After starting the application, you can verify that the backend is running and connected to the database by visiting the health check endpoint in your browser:
+Verify that the backend service is up and connected to your database by visiting:
 
 👉 **[http://localhost:5000/api/health](http://localhost:5000/api/health)**
 
-You should receive a JSON response showing database connection status:
+Expected JSON response:
 ```json
 {
   "status": "UP",
   "database": "connected",
-  "timestamp": "2026-06-26T11:30:00.000Z"
+  "timestamp": "2026-07-25T12:45:00.000Z"
 }
 ```
 
