@@ -23,6 +23,7 @@ import BankStatementAnalyzer from "./pages/BankStatementAnalyzer";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import SmartAdvisor from "./pages/SmartAdvisor";
+import AgenticIntelligence from "./pages/AgenticIntelligence";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,8 @@ const App = () => (
               <Route path="settings" element={<SettingsPage />} />
               <Route path="bank-statement" element={<BankStatementAnalyzer />} />
               <Route path="smart-advisor" element={<SmartAdvisor />} />
+              <Route path="assignment-2" element={<AgenticIntelligence />} />
+              <Route path="agentic-ai" element={<AgenticIntelligence />} />
               <Route path="admin" element={<AdminDashboard />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
             </Route>

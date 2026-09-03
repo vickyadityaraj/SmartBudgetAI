@@ -198,10 +198,10 @@ const SmartAdvisor: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-card border rounded-lg p-6 shadow-sm gap-4 animate-fade-in">
         <div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-primary border-primary">Smart Advisor</Badge>
-            <span className="text-xs text-muted-foreground font-medium">Personal Finance Copilot</span>
+            <Badge variant="outline" className="text-primary border-primary">Assignment 1</Badge>
+            <span className="text-xs text-muted-foreground font-medium">Smart AI Financial Advisor</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight mt-1 font-sans">Smart Advisor</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mt-1 font-sans">Assignment 1</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             Optimize your budget and accelerate savings. Consult the AI advisor, generate instant insights, calculate compounding models, and audit financial records.
           </p>

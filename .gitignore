@@ -7,7 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+**/node_modules
 dist
 dist-ssr
 *.local
@@ -25,11 +27,18 @@ dist-ssr
 
 # Environment variables (Crucial for security)
 .env
-.env.local
-.env.*.local
+.env*
+!.env.example
+*.env
 backend/.env
-backend/.env.local
+backend/.env*
+!backend/.env.example
+
+# Uploads & Temp files
+uploads/
+backend/uploads/
 
 # Python files
 __pycache__/
 *.pyc
+*.pyo

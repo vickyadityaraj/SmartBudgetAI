@@ -15,7 +15,8 @@ import {
   FileSpreadsheet,
   Users,
   Shield,
-  Brain
+  Brain,
+  Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +40,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     ? [
         { icon: Shield, label: 'Admin Overview', path: '/dashboard/admin' },
         { icon: Users, label: 'User Management', path: '/dashboard/admin/users' },
-        { icon: Brain, label: 'Smart Advisor', path: '/dashboard/smart-advisor' },
+        { icon: Brain, label: 'Assignment 1', path: '/dashboard/smart-advisor' },
+        { icon: Bot, label: 'Assignment 2', path: '/dashboard/assignment-2' },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
       ]
     : [
@@ -49,7 +51,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         { icon: PiggyBank, label: 'Savings', path: '/dashboard/savings' },
         { icon: Target, label: 'Goals', path: '/dashboard/goals' },
         { icon: FileSpreadsheet, label: 'Bank Statement', path: '/dashboard/bank-statement' },
-        { icon: Brain, label: 'Smart Advisor', path: '/dashboard/smart-advisor' },
+        { icon: Brain, label: 'Assignment 1', path: '/dashboard/smart-advisor' },
+        { icon: Bot, label: 'Assignment 2', path: '/dashboard/assignment-2' },
         { icon: BellRing, label: 'Alerts', path: '/dashboard/alerts' },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
       ];

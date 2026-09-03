@@ -40,12 +40,34 @@ def get_llm_response(prompt, system_instruction=None):
                 messages.append({"role": "system", "content": system_instruction})
             messages.append({"role": "user", "content": prompt})
             
-            # Using llama-3.3-70b-versatile
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=messages
-            )
-            return response.choices[0].message.content
+            # Candidate models to try in order
+            candidate_models = [
+                "openai/gpt-oss-120b",
+                "qwen/qwen3.8-27b",
+                "openai/gpt-oss-20b",
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile",
+                "llama3-70b-8192"
+            ]
+            
+            last_err = None
+            for model_candidate in candidate_models:
+                try:
+                    response = client.chat.completions.create(
+                        model=model_candidate,
+                        messages=messages
+                    )
+                    return response.choices[0].message.content
+                except Exception as me:
+                    last_err = me
+                    continue
+            
+            if last_err and not gemini_key and not openai_key:
+                print(json.dumps({
+                    "error": "Groq API Error",
+                    "message": str(last_err)
+                }))
+                sys.exit(1)
         except Exception as e:
             if not gemini_key and not openai_key:
                 print(json.dumps({

@@ -279,7 +279,7 @@ export const adminApi = {
   }
 };
 
-// AI Assignment API endpoints
+// AI Assignment 1 API endpoints
 export const aiApi = {
   configCheck: async () => {
     return apiClient.get('/ai/config-check');
@@ -299,6 +299,29 @@ export const aiApi = {
         'Content-Type': 'multipart/form-data'
       }
     });
+  }
+};
+
+// Applied Agentic AI - Assignment 2 API endpoints
+export const agenticAiApi = {
+  configCheck: async () => {
+    return apiClient.get('/ai/config-check');
+  },
+  runDocuSense: async (formData: FormData) => {
+    return apiClient.post('/ai/v2/document-intelligence', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  runMarketResearch: async (data: { topic: string; depth?: string; focusAreas?: string }) => {
+    return apiClient.post('/ai/v2/market-research', data);
+  },
+  runSecurityAudit: async (data: { logs: string }) => {
+    return apiClient.post('/ai/v2/security-audit', data);
+  },
+  runMultiAgentSwarm: async (data: { task: string; userProfile?: string }) => {
+    return apiClient.post('/ai/v2/multi-agent-swarm', data);
   }
 };
 

@@ -178,4 +178,111 @@ router.post('/doc-analyzer', upload.single('document'), async (req, res) => {
   }
 });
 
+// =============================================================================
+// CODING ASSIGNMENT 2: APPLIED AGENTIC AI ENDPOINTS
+// =============================================================================
+
+// 1. DocuSense Financial Reader (Assignment 2 - Task 1: Document RAG Agent)
+router.post('/v2/document-intelligence', upload.single('document'), async (req, res) => {
+  const { query, sampleDocName } = req.body;
+  const file = req.file;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Missing query parameter in request' });
+  }
+
+  let targetPath = null;
+  let isTempFile = false;
+
+  if (file) {
+    targetPath = file.path;
+    isTempFile = true;
+  } else if (sampleDocName) {
+    // Check if user requested a preloaded sample document in the workspace
+    const workspaceRoot = path.join(__dirname, '..', '..');
+    const possibleSamplePath = path.join(workspaceRoot, sampleDocName);
+    if (fs.existsSync(possibleSamplePath)) {
+      targetPath = possibleSamplePath;
+      isTempFile = false;
+    } else {
+      return res.status(404).json({ error: `Sample document '${sampleDocName}' not found in workspace.` });
+    }
+  } else {
+    // Default fallback to SBI_Bank_Statement_Long.pdf if present
+    const defaultSample = path.join(__dirname, '..', '..', 'SBI_Bank_Statement_Long.pdf');
+    if (fs.existsSync(defaultSample)) {
+      targetPath = defaultSample;
+      isTempFile = false;
+    } else {
+      return res.status(400).json({ error: 'Please upload a document file (.pdf, .txt, .csv, .docx) or select a sample document.' });
+    }
+  }
+
+  try {
+    const result = await runPythonScript('document_intelligence.py', [targetPath, query]);
+    
+    if (isTempFile && fs.existsSync(targetPath)) {
+      fs.unlink(targetPath, (err) => {
+        if (err) console.error('Error cleaning up temp file:', targetPath, err);
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error in Document Intelligence API:', error);
+    if (isTempFile && targetPath && fs.existsSync(targetPath)) {
+      fs.unlinkSync(targetPath);
+    }
+    res.status(500).json({ error: 'Failed to process document intelligence request', details: error.message });
+  }
+});
+
+// 2. MarketPulse Deep Research Engine (Assignment 2 - Task 2: Search & Synthesis Agent)
+router.post('/v2/market-research', async (req, res) => {
+  const { topic, depth = 'comprehensive', focusAreas = 'Macroeconomic Drivers, Valuation, SWOT, Risk Factors' } = req.body;
+  if (!topic) {
+    return res.status(400).json({ error: 'Missing topic in request body' });
+  }
+
+  try {
+    const result = await runPythonScript('market_research.py', [topic, depth, focusAreas]);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in MarketPulse Research API:', error);
+    res.status(500).json({ error: 'Failed to execute Market Research Agent', details: error.message });
+  }
+});
+
+// 3. Sentinel Fraud & Threat Auditor (Assignment 2 - Task 3: Security Log Agent)
+router.post('/v2/security-audit', async (req, res) => {
+  const { logs } = req.body;
+  if (!logs) {
+    return res.status(400).json({ error: 'Missing security logs or alert payload in request body' });
+  }
+
+  try {
+    const result = await runPythonScript('security_auditor.py', [logs]);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in Sentinel Security Audit API:', error);
+    res.status(500).json({ error: 'Failed to execute Security Threat Auditor Agent', details: error.message });
+  }
+});
+
+// 4. AlphaStrategist Multi-Agent Swarm (Assignment 2 - Task 4: Collaborative Agent Swarm)
+router.post('/v2/multi-agent-swarm', async (req, res) => {
+  const { task, userProfile = 'Monthly Income: ₹1,50,000; Monthly Expenses: ₹55,000; Savings: ₹4,00,000; Risk Profile: Balanced Growth' } = req.body;
+  if (!task) {
+    return res.status(400).json({ error: 'Missing task / financial goal description' });
+  }
+
+  try {
+    const result = await runPythonScript('multi_agent_swarm.py', [task, userProfile]);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in AlphaStrategist Swarm API:', error);
+    res.status(500).json({ error: 'Failed to execute Multi-Agent Swarm', details: error.message });
+  }
+});
+
 module.exports = router;
